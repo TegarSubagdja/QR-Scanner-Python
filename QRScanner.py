@@ -36,8 +36,12 @@ contours, _ = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 # contour_img = np.zeros((H, W), np.uint8)
 contour_img = np.zeros(img.shape, dtype=np.uint8)
 
-# Draw contours on the empty image
-cv2.drawContours(contour_img, contours, -1, (0, 255, 0), 1)
+# Loop through the contours
+for contour in contours:
+    for i in range(len(contour)):
+        pt1 = tuple(contour[i][0])
+        pt2 = tuple(contour[(i+1) % len(contour)][0])
+        cv2.line(contour_img, pt1, pt2, (0, 255, 0), 1)
 
 # Loop through the contours
 for contour in contours:
