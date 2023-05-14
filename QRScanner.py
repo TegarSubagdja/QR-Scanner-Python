@@ -36,8 +36,39 @@ contours, _ = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 # contour_img = np.zeros((H, W), np.uint8)
 contour_img = np.zeros(img.shape, dtype=np.uint8)
 
-# Draw contours on the empty image
-cv2.drawContours(contour_img, contours, -1, (0, 255, 0), 1)
+# Loop through the contours
+for contour in contours:
+    # Iterate through the points in the contour
+    for i in range(len(contour)):
+        # Get the current and next point
+        current_point = contour[i][0]
+        next_point = contour[(i + 1) % len(contour)][0]
+
+        # Calculate the coordinates of the line between the current and next point
+        x1, y1 = current_point[0], current_point[1]
+        x2, y2 = next_point[0], next_point[1]
+
+        # Draw the line segment pixel by pixel
+        dx = abs(x2 - x1)
+        dy = abs(y2 - y1)
+        sx = -1 if x1 > x2 else 1
+        sy = -1 if y1 > y2 else 1
+        err = dx - dy
+
+        while True:
+            contour_img[y1, x1] = (0, 255, 0)  # Set pixel color to green
+
+            if x1 == x2 and y1 == y2:
+                break
+
+            e2 = 2 * err
+            if e2 > -dy:
+                err -= dy
+                x1 += sx
+            if e2 < dx:
+                err += dx
+                y1 += sy
+
 
 # Loop through the contours
 for contour in contours:
