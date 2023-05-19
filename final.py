@@ -30,6 +30,7 @@ class ShowImage(QMainWindow):
         cv2.destroyAllWindows()
         self.displayImage(1, self.img)
         self.grayScale()
+        self.sharpenImage()
         self.threshold()
         self.findContuor()
 
@@ -47,8 +48,43 @@ class ShowImage(QMainWindow):
             self.img = cv2.resize(self.img, (600, 600))
             self.displayImage(1, self.img)
             self.grayScale()
+            self.sharpenImage()
             self.threshold()
             self.findContuor()
+
+    def sharpenImage(self):
+        kernel = np.array(
+            [
+                [0, -1, 0],
+                [-1, 5, -1],
+                [0, -1, 0]
+            ])
+
+        img_height = self.gray.shape[0]
+        img_width = self.gray.shape[1]
+
+        kernel_height = kernel.shape[0]
+        kernel_width = kernel.shape[1]
+
+        H = (kernel_height) // 2
+        W = (kernel_width) // 2
+
+        out = np.zeros((img_height, img_width))
+
+        for i in np.arange(H + 1, img_height - H):
+            for j in np.arange(W + 1, img_width - W):
+                sum = 0
+                for k in np.arange(-H, H + 1):
+                    for l in np.arange(-W, W + 1):
+                        a = self.gray[i + k, j + l]
+                        w = kernel[H + k, W + l]
+                        sum += (w * a)
+                out[i, j] = sum
+
+        sharpened_img = np.clip(out, 0, 255).astype(np.uint8)
+        self.gray = sharpened_img
+        self.displayImage(2, sharpened_img)
+
 
     def grayScale(self):
         H, W = self.img.shape[:2]
@@ -56,10 +92,9 @@ class ShowImage(QMainWindow):
         for i in range(H):
             for j in range(W):
                 gray[i, j] = np.clip(0.299 * self.img[i, j, 0] +
-                                     0.587 * self.img[i, j, 1] +
+                                    0.587 * self.img[i, j, 1] +
                                      0.114 * self.img[i, j, 2], 0, 255)
         self.gray = gray
-        self.displayImage(2, gray)
 
     def threshold(self):
         threshold = 50
